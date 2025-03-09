@@ -95,10 +95,28 @@ class R4 : public VESSEL4{
         void MakeAnim_Tachometer();
         void MakeAnim_Altimeter();
         void MakeAnim_Compass();
-        void MakeAnim_Vertical_Speed();
-        void MakeAnim_Artificial_Horizon();
-        void MakeAnim_Fuel_Indicator();
-        void MakeAnim_Collective_Indicator();
+        void MakeAnim_VerticalSpeed();
+        void MakeAnim_ArtificialHorizon();
+        void MakeAnim_FuelIndicator();
+        void MakeAnim_CollectiveIndicator();
+        void MakeAnim_MainWheels();
+        void MakeAnim_TailWheel();
+
+        VECTOR3 GetHelp_RotatePitch(VECTOR3 point, double pitch);
+        VECTOR3 GetHelp_RotateYaw(VECTOR3 point, double yaw);
+        VECTOR3 GetHelp_RotateBank(VECTOR3 point, double bank);
+        VECTOR3 GetHelp_Rotate(VECTOR3 point, double pitch, double yaw, double bank);
+
+        void GetPhysics_Drag();
+
+        void SetAutopilot_Altitude();
+
+        void MakePretty_NavLights();
+        void MakePretty_SearchLight();
+        void MakePretty_CabinLights();
+
+        void SetAnnotation_Messages(bool show_help);
+        void MakeAnnotation_Messages();
 
 
     private:
@@ -107,6 +125,9 @@ class R4 : public VESSEL4{
         THRUSTER_HANDLE th_dummy, thg_dummy, th_hover, thg_hover;
         PROPELLANT_HANDLE main_fuel_tank;
         unsigned int ui_hmesh;
+        BEACONLIGHTSPEC *beaconspec;
+        BEACONLIGHTSPEC *searchlight_beaconspec;
+        NOTEHANDLE message1_annotation, message2_annotation, message3_annotation, message4_annotation, message5_annotation, message6_annotation, message7_annotation, message8_annotation, message9_annotation, message10_annotation, message11_annotation, message12_annotation, message13_annotation, message14_annotation, message15_annotation;
 
         unsigned int anim_main_rotor;
         unsigned int anim_main_blade_1;
@@ -118,6 +139,25 @@ class R4 : public VESSEL4{
         unsigned int anim_tail_blade_3;
 
         unsigned int anim_airspeed;
+        unsigned int anim_altimeter_1k,anim_altimeter_10k;
+
+        unsigned int anim_compass;
+
+        unsigned int anim_vertical_speed;
+
+        unsigned int anim_horizon_circle;
+        unsigned int anim_horizon_ball_pitch;
+
+        unsigned int anim_tachometer;
+
+        unsigned int anim_fuel_indicator;
+
+        unsigned int anim_collective_indicator;
+
+        unsigned int anim_left_main_wheel,anim_right_main_wheel;
+
+        unsigned int anim_tail_wheel_strut, anim_tail_wheel;
+
 
         bool altitude_hold;
         bool brake_hold;

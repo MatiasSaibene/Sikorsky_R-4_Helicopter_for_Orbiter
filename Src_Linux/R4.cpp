@@ -69,6 +69,83 @@ R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
 
     thg_hover = nullptr;
 
+    anim_main_rotor = 0;
+
+    anim_main_blade_1 = 0;
+
+    anim_main_blade_2 = 0;
+
+    anim_main_blade_3 = 0;
+
+    anim_tail_rotor = 0;
+
+    anim_tail_blade_1 = 0;
+
+    anim_tail_blade_2 = 0;
+
+    anim_tail_blade_3 = 0;
+
+    anim_airspeed = 0;
+
+    anim_airspeed = 0;
+
+    anim_airspeed = 0;
+
+    anim_airspeed = 0;
+
+    anim_airspeed = 0;
+
+    anim_airspeed = 0;
+
+    anim_airspeed = 0;
+
+    anim_altimeter_1k = 0;
+
+    anim_altimeter_10k = 0;
+
+    anim_compass = 0;
+
+    anim_vertical_speed = 0;
+
+    anim_horizon_circle = 0;
+
+    anim_horizon_ball_pitch = 0;
+
+    anim_tachometer = 0;
+
+    anim_fuel_indicator = 0;
+
+    anim_collective_indicator = 0;
+
+    anim_left_main_wheel = 0;
+
+    anim_right_main_wheel = 0;
+
+    anim_tail_wheel_strut = 0;
+
+    anim_tail_wheel = 0;
+
+    beaconspec = nullptr;
+
+    searchlight_beaconspec = nullptr;
+
+    message1_annotation = nullptr;
+    message2_annotation = nullptr;
+    message3_annotation = nullptr;
+    message4_annotation = nullptr;
+    message5_annotation = nullptr;
+    message6_annotation = nullptr;
+    message7_annotation = nullptr;
+    message8_annotation = nullptr;
+    message9_annotation = nullptr;
+    message10_annotation = nullptr;
+    message11_annotation = nullptr;
+    message12_annotation = nullptr;
+    message13_annotation = nullptr;
+    message14_annotation = nullptr;
+    message15_annotation = nullptr;
+
+
     //Initial control settings
 
     double roll = 0.0;
