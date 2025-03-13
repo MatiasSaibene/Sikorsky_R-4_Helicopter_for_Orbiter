@@ -17,7 +17,12 @@
 const double FT = 0.3048; //multiply this by length in feet to get m
 const double LB = 0.4538; //multiply this by mass in lbm to get kg
 
-const char *const MESH_NAME = "R-4/R-4";
+const char *const FUS_MESH_NAME = "R-4/Fuselage";
+
+const char *const GEAR_MESH_NAME = "R-4/Gear";
+
+const char *const FLOAT_MESH_NAME = "R-4/Gear";
+
 
 //Vessel properties (R-4, https://en.wikipedia.org/wiki/Sikorsky_R-4, https://www.nationalmuseum.af.mil/Visit/Museum-Exhibits/Fact-Sheets/Display/Article/195868/sikorsky-r-4b-hoverfly/)
 
@@ -112,13 +117,19 @@ class R4 : public VESSEL4{
         void clbkSetClassCaps(FILEHANDLE cfg) override;
         int clbkConsumeBufferedKey(int key, bool down, char *kstate) override;
         int clbkConsumeDirectKey(char *kstate) override;
+        void clbkPostCreation() override;
+        void clbkVisualCreated(VISHANDLE vis, int refcount) override;
+        void clbkVisualDestroyed(VISHANDLE vis, int refcount) override;
+        void clbkSaveState(FILEHANDLE scn) override;
 
-        void SetContactPoints();
-        void SetRollingWheels();
-        void ParkingBrake();
-        double ApplyBrakeForce();
-        void SetLeftBrakeForce();
-        void SetRightBrakeForce();
+        void SetFeature_SetContactPointsWheels();
+        void SetFeature_MakeContactPointsFloats();
+        void SetFeature_SetRollingWheels();
+        void SetFeature_ParkingBrake();
+        double SetFeature_ApplyBrakeForce();
+        void SetFeature_SetLeftBrakeForce();
+        void SetFeature_SetRightBrakeForce();
+        void SetFeature_CrashOrSplash();
 
         double GetEngine_OttoEfficiency(struct EngineSpec);
         double GetEngine_DieselEfficiency(struct EngineSpec);
@@ -184,7 +195,7 @@ class R4 : public VESSEL4{
 
     private:
 
-        MESHHANDLE hmesh;
+        MESHHANDLE hfuselage, hgear, hfloats;
         DEVMESHHANDLE hdevmesh0, hdevmesh1;
         MATERIAL *diffusive_color;
         MATERIAL *emissive_color;
@@ -200,6 +211,9 @@ class R4 : public VESSEL4{
         LightEmitter *beaconlight;
         LightEmitter *searchlight_spec;
         LightEmitter *cabinlight;
+        VESSEL *vi;
+        OBJHANDLE hR4;
+
         NOTEHANDLE message1_annotation, message2_annotation, message3_annotation, message4_annotation, message5_annotation, message6_annotation, message7_annotation, message8_annotation, message9_annotation, message10_annotation, message11_annotation, message12_annotation, message13_annotation, message14_annotation, message15_annotation;
 
         unsigned int anim_main_rotor;
@@ -335,6 +349,17 @@ class R4 : public VESSEL4{
         VECTOR3 tachometer_needle_location = _V(-0.3512, 0.0822, 2.0188);
 
         VECTOR3 fuel_indicator_needle_location = _V(0.3512, 0.0822, 2.0188);
+
+        std::array<VECTOR3, 4> pos = {
+            VECTOR3{operator-(_V(left_pontoon_front.x, left_pontoon_front.y, pontoon_length / 2), cg)},
+    
+            VECTOR3{operator-(_V(left_pontoon_rear.x, left_pontoon_rear.y, -pontoon_length / 2), cg)},
+    
+            VECTOR3{operator-(_V(right_pontoon_rear.x, right_pontoon_rear.y, -pontoon_length / 2), cg)},
+    
+            VECTOR3{operator-(_V(right_pontoon_front.x, right_pontoon_front.y, pontoon_length / 2), cg)}
+        };
+        TOUCHDOWNVTX td_points_pontoon_land[sizeof(pos)];
 
         //Camera viewpoints
 

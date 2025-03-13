@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <string>
 #define ORBITER_MODULE
 #include "R4.h"
 
@@ -165,12 +166,16 @@ R4::~R4(){
 
 void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
+    hR4 = GetHandle();
+
+    vi = oapiGetVesselInterface(hR4);
+
     EngineSpec _engine_spec;
 
-    hmesh = oapiLoadMeshGlobal(MESH_NAME);
+    /* hmesh = oapiLoadMeshGlobal(MESH_NAME);
     ui_hmesh = AddMesh(hmesh);
     SetMeshVisibilityMode(ui_hmesh, MESHVIS_ALWAYS);
-    ShiftMesh(ui_hmesh, operator*(cg, -1));
+    ShiftMesh(ui_hmesh, operator*(cg, -1)); */
 
     SetEmptyMass(empty_mass);
     main_fuel_tank = CreatePropellantResource(main_fuel_tank_max);
@@ -179,9 +184,9 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
     SetContactPoints();
 
-    double efficiency = GetEngine_OttoEfficiency(_engine_spec);
+    double efficiency = GetEngine_OttoEfficiency(_engine_spec); //get thermal efficiency of engine
 
-    SetRotDrag(_V(0.5, 1.0, 0.5));
+    SetRotDrag(_V(0.5, 0.5, 0.5));
 
     //Define vertical stabilizer
 
@@ -208,7 +213,160 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
     thg_hover = CreateThrusterGroup(&th_hover, 1, THGROUP_HOVER);
 
+    MakeAnim_MainRotor();
+    MakeAnim_TailRotor();
+    MakeAnim_AirspeedIndicator();
+    MakeAnim_Tachometer();
+    MakeAnim_Altimeter();
+    MakeAnim_Compass();
+    MakeAnim_VerticalSpeed();
+    MakeAnim_ArtificialHorizon();
+    MakeAnim_FuelIndicator();
+    MakeAnim_CollectiveIndicator();
 
+    MakePretty_NavLights();
+    MakePretty_SearchLight();
+    MakePretty_CabinLights();
+
+    MakeAnnotation_Messages();
+
+}
+
+void R4::clbkPostCreation(){
+
+    hfuselage = oapiLoadMeshGlobal(FUS_MESH_NAME);
+
+    AddMesh(hfuselage);
+
+    ShiftMesh(0, operator*(cg, -1));
+
+    SetMeshVisibilityMode(0, MESHVIS_ALWAYS);
+
+
+
+    if(floats == false){
+
+        hgear = oapiLoadMeshGlobal(GEAR_MESH_NAME);
+
+        AddMesh(hgear);
+
+        ShiftMesh(1, operator*(cg, -1));
+
+        SetMeshVisibilityMode(1, MESHVIS_ALWAYS);
+
+        SetFeature_SetContactPointsWheels();
+
+        MakeAnim_MainWheels();
+        
+        MakeAnim_TailWheel();
+
+    } else if(floats == false){
+
+        hfloats = oapiLoadMeshGlobal(FLOAT_MESH_NAME);
+
+        AddMesh(hfloats);
+
+        ShiftMesh(1, operator*(cg, -1));
+
+        SetMeshVisibilityMode(1, MESHVIS_ALWAYS);
+
+        SetFeature_MakeContactPointsFloats();
+        
+        SetTouchdownPoints(td_points_pontoon_land, sizeof(pos));
+    }
+
+}
+
+void R4::clbkVisualCreated(VISHANDLE vis, int refcount){
+
+    hdevmesh0 = GetDevMesh(vis, 0);
+    hdevmesh1 = GetDevMesh(vis, 1);
+
+    SetPretty_ClearWindows(); //control inner window reflections
+    SetPretty_CabinLights();
+    SetPretty_CockpitGlow();
+    SetPretty_HelicopterColor();
+
+}
+
+void R4::clbkVisualDestroyed(VISHANDLE vis, int refcount){
+
+    hdevmesh0 = NULL;
+
+    hdevmesh1 = NULL;
+
+}
+
+void R4::clbkSaveState(FILEHANDLE scn){
+
+    MainRotorSpec main_rotor_spec;
+
+    std::string strboolfloats = std::to_string(floats);
+    const char *boolfloats = strboolfloats.c_str();
+
+
+    std::string strboolbrk = std::to_string(brake_hold);
+    const char *boolbrk = strboolbrk.c_str();
+
+
+    std::string strbooleng = std::to_string(engine_on);
+    const char *booleng = strbooleng.c_str();
+
+    std::string strboollights = std::to_string(lights_on);
+    const char *boollights = strboollights.c_str();
+
+    std::string strboolatthold = std::to_string(altitude_hold);
+    const char *boolatthold = strboolatthold.c_str();
+
+    std::string stralttgt = std::to_string(altitude_target);
+    const char *alt_target = stralttgt.c_str();
+
+    std::string strrpm = std::to_string(rpm);
+    const char *n_rpm = strrpm.c_str();
+
+    std::string strthlevel = std::to_string(throttle_level);
+    const char *thlevel = strthlevel.c_str();
+
+    std::string strcollective = std::to_string( main_rotor_spec.prop_eff);
+    const char *collectivepropeff = strcollective.c_str();
+
+    std::string strcabinlightlvl = std::to_string(cabin_light_level);
+    const char *cabinlightlvl = strcabinlightlvl.c_str();
+
+    std::string strinstlightlvl = std::to_string(instrument_light_level);
+    const char *instlightlvl = strinstlightlvl.c_str();
+
+    oapiWriteScenario_string(scn, "float", boolfloats);
+
+    if(color != NULL){
+
+        std::string colorStr = std::format("{{r={},g={},b={},a={}}}", color->r, color->g, color->b, color->a);
+
+        oapiWriteScenario_string(scn, "color", colorStr.c_str());
+
+    }
+
+
+
+    oapiWriteScenario_string(scn, "brake_hold", boolbrk);
+
+    oapiWriteScenario_string(scn, "engine_on", booleng);
+
+    oapiWriteScenario_string(scn, "lights_on", boollights);
+
+    oapiWriteScenario_string(scn, "altitude_hold", boolatthold);
+
+    oapiWriteScenario_string(scn, "altitude_target", alt_target);
+
+    oapiWriteScenario_string(scn, "rpm", n_rpm);
+
+    oapiWriteScenario_string(scn, "throttle_level", thlevel);
+
+    oapiWriteScenario_string(scn, "collective", collectivepropeff);
+
+    oapiWriteScenario_string(scn, "cabin_light_level", cabinlightlvl);
+
+    oapiWriteScenario_string(scn, "instrument_light_level", instlightlvl);
 
 }
 
@@ -334,8 +492,13 @@ int R4::clbkConsumeDirectKey(char *kstate){
 
     if(KEYDOWN(kstate, OAPI_KEY_B)){
 
-        SetLeftBrakeForce();
-        SetRightBrakeForce();
+        if(floats == false){
+
+            SetFeature_SetLeftBrakeForce();
+            SetFeature_SetRightBrakeForce();
+
+        }
+        
     }
 
     return 0;
