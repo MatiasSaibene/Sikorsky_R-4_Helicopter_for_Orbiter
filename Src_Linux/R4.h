@@ -6,6 +6,7 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <cstddef>
 #ifndef R4_H
 #define R4_H
@@ -139,6 +140,19 @@ class R4 : public VESSEL4{
         void MakeAnim_MainWheels();
         void MakeAnim_TailWheel();
 
+        void SetAnim_MainRotor();
+        void SetAnim_TailRotor();
+        void SetAnim_AirspeedIndicator();
+        void SetAnim_Altimeter();
+        void SetAnim_Compass();
+        void SetAnim_VerticalSpeed();
+        void SetAnim_ArtificialHorizon();
+        void SetAnim_Tachometer();
+        void SetAnim_FuelIndicator();
+        void SetAnim_MainWheels();
+        void SetAnim_TailWheel();
+
+
         VECTOR3 GetHelp_RotatePitch(VECTOR3 point, double pitch);
         VECTOR3 GetHelp_RotateYaw(VECTOR3 point, double yaw);
         VECTOR3 GetHelp_RotateBank(VECTOR3 point, double bank);
@@ -217,7 +231,19 @@ class R4 : public VESSEL4{
 
         unsigned int anim_tail_wheel_strut, anim_tail_wheel;
 
+        double main_rotor_anim_state;
+        double tail_rotor_anim_state;
+        double airspeed_anim_state;
+        double altimeter_10k_anim_state;
+        double altimeter_1k_anim_state;
+        double compass_anim_state;
+        double vertical_speed_anim_state;
+        double left_wheel_anim_state;
+        double right_wheel_anim_state;
+        double tail_wheel_strut_anim_state;
+        double tail_wheel_anim_state;
 
+        //Boolean flags
         bool altitude_hold;
         bool brake_hold;
         bool engine_on;
@@ -227,6 +253,7 @@ class R4 : public VESSEL4{
         bool lights_switched;
         bool light_level_switched;
         bool floats;
+        bool water;
 
         double throttle_level;
 
@@ -236,6 +263,8 @@ class R4 : public VESSEL4{
         double cabin_light_level;
 
         double altitude_target;
+
+        double tail_rotor_dir;
 
         double main_rotor_ratio = 0.5; //ratio of main rotor rpm to engine rpm
 
@@ -254,6 +283,7 @@ class R4 : public VESSEL4{
 
         VECTOR3 cg = {main_rotor_axis.x, -0.5, main_rotor_axis.z}; //location of CG relative to mesh
 
+        //Wheels
         double main_wheel_diameter = 0.488;
         double tail_wheel_diameter = 0.298;
 
@@ -271,6 +301,40 @@ class R4 : public VESSEL4{
 
         VECTOR3 main_rotor_thrust_vec = _V(0, 0, 0);
 
+        
+        //Pontoons
+        VECTOR3 right_pontoon_front = _V(1.3924, 1.3480, 1.5829);
+        VECTOR3 right_pontoon_rear = _V(1.3924, -1.3480, -1.8318);
+        VECTOR3 left_pontoon_front = _V(-1.3924, -1.3480, 1.5829);
+        VECTOR3 left_pontoon_rear = _V(-1.3924, -1.3480, -1.8318);
+
+        double pontoon_dia = 0.45;
+
+        double pontoon_length = right_pontoon_front.z - right_pontoon_rear.z;
+
+
+        //Instruments
+
+        VECTOR3 indicator_axis = _V(0, 0.255766, 0.966739);
+
+        VECTOR3 vecA = _V(0, 0, -1);
+        VECTOR3 vecB = indicator_axis;
+
+        double dash_angle = std::acos(dotp(vecA, vecB) / length(vecA) * length(vecB));
+
+        VECTOR3 airspeed_needle_location = _V(-0.2410, 0.0818, 2.0201);
+
+        VECTOR3 altimeter_needle_location = _V(-0.1205, 0.0818, 2.0201);
+
+        VECTOR3 compass_wheel_location = _V(0.2410, 0.0818, 2.0201);
+
+        VECTOR3 vertical_speed_needle_location = _V(0.1205, 0.0818, 2.0201);
+
+        VECTOR3 horizon_circle_location = _V(0, 0.0818, 2.0201);
+
+        VECTOR3 tachometer_needle_location = _V(-0.3512, 0.0822, 2.0188);
+
+        VECTOR3 fuel_indicator_needle_location = _V(0.3512, 0.0822, 2.0188);
 
         //Camera viewpoints
 

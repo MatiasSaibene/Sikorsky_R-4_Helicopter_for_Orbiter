@@ -1,27 +1,6 @@
 #include "R4.h"
 #include <cmath>
 
-VECTOR3 indicator_axis = _V(0, 0.255766, 0.966739);
-
-VECTOR3 vecA = _V(0, 0, -1);
-VECTOR3 vecB = indicator_axis;
-
-double dash_angle = std::acos(dotp(vecA, vecB) / length(vecA) * length(vecB));
-
-VECTOR3 airspeed_needle_location = _V(-0.2410, 0.0818, 2.0201);
-
-VECTOR3 altimeter_needle_location = _V(-0.1205, 0.0818, 2.0201);
-
-VECTOR3 compass_wheel_location = _V(0.2410, 0.0818, 2.0201);
-
-VECTOR3 vertical_speed_needle_location = _V(0.1205, 0.0818, 2.0201);
-
-VECTOR3 horizon_circle_location = _V(0, 0.0818, 2.0201);
-
-VECTOR3 tachometer_needle_location = _V(-0.3512, 0.0822, 2.0188);
-
-VECTOR3 fuel_indicator_needle_location = _V(0.3512, 0.0822, 2.0188);
-
 void R4::MakeAnim_MainRotor(){
 
     ANIMATIONCOMPONENT_HANDLE parent;
