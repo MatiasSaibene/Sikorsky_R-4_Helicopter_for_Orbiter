@@ -23,6 +23,13 @@ const char *const MESH_NAME = "R-4/R-4";
 const double empty_mass = 2011*LB + 100.0; //empty R-4 plus chonky pilot
 const double main_fuel_tank_max = 180*LB;  //30 gallon capacity at 6 lbm/gal for avgas.
 
+const double rho_sea = 1047; //density of sea water, kg/m3
+const double rho_h20 = 1000; //density of fresh water, kg/m3
+
+const double mu_s = 0.9; //Static friction coefficient, rubber on concrete (dry), dimensionless
+const double mu_d = 0.7;  //Dynamic friction coefficient, rubber on concrete (dry), dimensionless
+
+
 
 
 class R4 : public VESSEL4{
@@ -33,6 +40,7 @@ class R4 : public VESSEL4{
         virtual ~R4();
 
         //Engine spec table (Warner Super Scarab 50 https://en.wikipedia.org/wiki/Warner_Scarab, https://www.warnerenginecompany.com/Warner Engines Specs.pdf)
+
         struct EngineSpec{
             
             double r = 5.20; //compression ratio
@@ -51,7 +59,33 @@ class R4 : public VESSEL4{
 
             double AF = 14.6;  //air fuel ratio (mass air/mass fuel) (stochiometric ~14.6:1 for typical liquid fuels)
 
-        } engine_spec;
+        };
+
+        struct GasTurbine_EngineSpec{
+
+            int rp = 20; //pressure ratio
+
+            int max_rpm = 3600; //maximum engine speed (rpm)
+
+            int min_rpm = 1000; //idle engine speed (rpm)
+
+            double max_air_flow = 69.4; //mass air flow at max rpm
+
+            double HV = 43e6; //lower heating value of fuel (J/kg) (~43 MJ/kg for typical liquid fuels)
+
+            double AF = 77.1; //air fuel ratio (mass air/mass fuel) (stochiometric ~14.6:1 for typical liquid fuels)
+        };
+
+        //Dummy struct
+        struct EngStruct{
+            double diameter = 0.0;
+
+            double prop_eff = 0.0;
+
+            std::string fluid = "";
+
+            double rp = 0.0;
+        };
 
         //Rotor diameters (R-4)
         struct MainRotorSpec{
@@ -62,7 +96,7 @@ class R4 : public VESSEL4{
 
             std::string fluid = "air"; //options: "air", "water", "sea_water"
 
-        } main_rotor_spec;
+        };
 
         struct TailRotorSpec{
 
@@ -72,13 +106,11 @@ class R4 : public VESSEL4{
 
             std::string fluid = "air"; //options: "air", "water", "sea_water"
 
-        } tail_rotor_spec;
+        };
 
         void clbkSetClassCaps(FILEHANDLE cfg) override;
         int clbkConsumeBufferedKey(int key, bool down, char *kstate) override;
         int clbkConsumeDirectKey(char *kstate) override;
-
-
 
         void SetContactPoints();
         void SetRollingWheels();
@@ -86,8 +118,13 @@ class R4 : public VESSEL4{
         double ApplyBrakeForce();
         void SetLeftBrakeForce();
         void SetRightBrakeForce();
-        double GetEngine_OttoEfficiency(struct EngineSpec engine_spec);
-        double GetEngine_DieselEfficiency(struct EngineSpec engine_spec);
+
+        double GetEngine_OttoEfficiency(struct EngineSpec);
+        double GetEngine_DieselEfficiency(struct EngineSpec);
+        double GetEngine_BraytonEfficiency(struct GasTurbine_EngineSpec);
+        void GetEngine_ReciprocatingPower(double efficiency, struct GasTurbine_EngineSpec, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
+        void GetEngine_GasTurbinePower(double efficiency, struct GasTurbine_EngineSpec, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
+
 
         void MakeAnim_MainRotor();
         void MakeAnim_TailRotor();
@@ -118,15 +155,37 @@ class R4 : public VESSEL4{
         void SetAnnotation_Messages(bool show_help);
         void MakeAnnotation_Messages();
 
+        double GetPropeller_Thrust(EngStruct, double, double);
+
+        void SetPretty_NavLights(bool lights_on);
+        void SetPretty_SearchLight(bool lights_on);
+        void SetPretty_CabinLights();
+        void SetPretty_ClearWindows();
+        void SetPretty_StatusLights();
+        void SetPretty_HelicopterColor();
+        void SetPretty_CockpitGlow();
+
+
+                
 
     private:
 
         MESHHANDLE hmesh;
+        DEVMESHHANDLE hdevmesh0, hdevmesh1;
+        MATERIAL *diffusive_color;
+        MATERIAL *emissive_color;
+        MATERIAL *mat_color;
+        MATERIAL *cockpit_lights_emissive;
+        MATERIAL *orange_mat;
+        COLOUR4 *color;
         THRUSTER_HANDLE th_dummy, thg_dummy, th_hover, thg_hover;
         PROPELLANT_HANDLE main_fuel_tank;
         unsigned int ui_hmesh;
         BEACONLIGHTSPEC *beaconspec;
         BEACONLIGHTSPEC *searchlight_beaconspec;
+        LightEmitter *beaconlight;
+        LightEmitter *searchlight_spec;
+        LightEmitter *cabinlight;
         NOTEHANDLE message1_annotation, message2_annotation, message3_annotation, message4_annotation, message5_annotation, message6_annotation, message7_annotation, message8_annotation, message9_annotation, message10_annotation, message11_annotation, message12_annotation, message13_annotation, message14_annotation, message15_annotation;
 
         unsigned int anim_main_rotor;
@@ -167,6 +226,11 @@ class R4 : public VESSEL4{
         bool lights_on;
         bool lights_switched;
         bool light_level_switched;
+        bool floats;
+
+        double throttle_level;
+
+        double collective_input;
 
         double instrument_light_level;
         double cabin_light_level;
@@ -176,6 +240,12 @@ class R4 : public VESSEL4{
         double main_rotor_ratio = 0.5; //ratio of main rotor rpm to engine rpm
 
         double tail_rotor_ratio = 0.5; //ratio of tail rotor rpm to engine rpm
+
+        double power;
+
+        double torque;
+
+        double rpm;
 
         //Main vessel locations for animations, useful mesh dimensions, etc..
 
@@ -199,7 +269,7 @@ class R4 : public VESSEL4{
 
         VECTOR3 tail_wheel_contact = operator+(tail_wheel_axis, {0, -0.5*tail_wheel_diameter, 0});
 
-        VECTOR3 main_rotor_thrust_vec;
+        VECTOR3 main_rotor_thrust_vec = _V(0, 0, 0);
 
 
         //Camera viewpoints

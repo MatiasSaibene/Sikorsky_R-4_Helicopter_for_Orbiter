@@ -1,5 +1,4 @@
 #include "R4.h"
-#include <complex>
 
 void R4::MakePretty_NavLights(){
 
@@ -43,11 +42,11 @@ void R4::MakePretty_NavLights(){
         beaconspec[i].tofs = 0;
         beaconspec[i].active = false;
 
-    
-
         AddBeacon(beaconspec);
+
+
     
-        LightEmitter *beaconlight = AddSpotLight(beaconpos[i], beacondir[i], 0.1, 1e-2, 0, 2e-2, PI, PI, beaconcol_light[i], beaconcol_light[i], beaconcol_light[i]);
+        beaconlight = AddSpotLight(beaconpos[i], beacondir[i], 0.1, 1e-2, 0, 2e-2, PI, PI, beaconcol_light[i], beaconcol_light[i], beaconcol_light[i]);
         beaconlight[i].SetVisibility(LightEmitter::VIS_ALWAYS);
         beaconlight[i].SetIntensity(0.4);
         beaconlight[i].Activate(false);
@@ -63,7 +62,7 @@ void R4::MakePretty_SearchLight(){
 
     VECTOR3 searchlight_dir = GetHelp_RotatePitch(_V(0, 0, 1), (0 * RAD));
 
-    LightEmitter *searchlight_spec = AddSpotLight(searchlight_pos, searchlight_dir, 1000, 1e-5, 0, 2e-5, 0.3, 0.5*PI, {1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1});
+    searchlight_spec = AddSpotLight(searchlight_pos, searchlight_dir, 1000, 1e-5, 0, 2e-5, 0.3, 0.5*PI, {1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1});
 
     searchlight_spec->SetVisibility(LightEmitter::VIS_ALWAYS);
     searchlight_spec->SetIntensity(1);
@@ -91,6 +90,9 @@ void R4::MakePretty_CabinLights(){
     VECTOR3 cabinlight_pos = _V(0.0, 1.0, 1.0);
     COLOUR4 cabinlight_col = {1, 0, 0};
 
-    LightEmitter *cabinlight = AddPointLight(cabinlight_pos, 19, 1e-3, 0, 2e-3, cabinlight_col, cabinlight_col, cabinlight_col);
+    cabinlight = AddPointLight(cabinlight_pos, 19, 1e-3, 0, 2e-3, cabinlight_col, cabinlight_col, cabinlight_col);
+    cabinlight->SetVisibility(LightEmitter::VIS_COCKPIT);
+    cabinlight->SetIntensity(0.0);
+    cabinlight->Activate(true);
     
 }

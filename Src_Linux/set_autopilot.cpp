@@ -25,7 +25,7 @@ void R4::SetAutopilot_Altitude(){
         double Kp = 0.8 * Ku;
         double Kd = 0.125 * Tu;
 
-        double collective_input = Kp * propoportional_error + Kd * derivative_error;
+        collective_input = Kp * propoportional_error + Kd * derivative_error;
 
         SetThrusterGroupLevel(THGROUP_HOVER, collective_input);
 

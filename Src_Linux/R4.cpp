@@ -165,6 +165,8 @@ R4::~R4(){
 
 void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
+    EngineSpec _engine_spec;
+
     hmesh = oapiLoadMeshGlobal(MESH_NAME);
     ui_hmesh = AddMesh(hmesh);
     SetMeshVisibilityMode(ui_hmesh, MESHVIS_ALWAYS);
@@ -177,7 +179,7 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
     SetContactPoints();
 
-    double efficiency = GetEngine_OttoEfficiency(engine_spec);
+    double efficiency = GetEngine_OttoEfficiency(_engine_spec);
 
     SetRotDrag(_V(0.5, 1.0, 0.5));
 
