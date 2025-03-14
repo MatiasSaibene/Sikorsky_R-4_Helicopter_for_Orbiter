@@ -34,12 +34,12 @@ void R4::SetPretty_ClearWindows(){
 
     int group = 19;
     COLOUR4 diff_col = {0.411, 0.612, 0.800, static_cast<float>(0.500 - 0.300 * cabin_light_level)};
-    diffusive_color->diffuse = diff_col;
+    diffusive_color.diffuse = diff_col;
     
 
     if(hdevmesh0 != nullptr){
 
-        oapiSetMaterial(hdevmesh0, group, diffusive_color);
+        oapiSetMaterial(hdevmesh0, group, &diffusive_color);
 
     }
 
@@ -66,53 +66,53 @@ void R4::SetPretty_StatusLights(){
                 };
                 
 
-                emissive_color->emissive = emiss_col;
+                emissive_color.emissive = emiss_col;
 
-                oapiSetMaterial(hdevmesh0, 0, emissive_color);
+                oapiSetMaterial(hdevmesh0, 0, &emissive_color);
 
             } else {
 
                 //autopilot has full control authority
 
-                emissive_color->emissive = emissive_on;
+                emissive_color.emissive = emissive_on;
 
-                oapiSetMaterial(hdevmesh0, 0, emissive_color);
+                oapiSetMaterial(hdevmesh0, 0, &emissive_color);
 
             }
 
         } else {
             
-            emissive_color->emissive = emissive_off;
+            emissive_color.emissive = emissive_off;
 
-            oapiSetMaterial(hdevmesh0, 0, emissive_color);
+            oapiSetMaterial(hdevmesh0, 0, &emissive_color);
 
         }
 
 
         if(engine_on){
 
-            emissive_color->emissive = emissive_on;
+            emissive_color.emissive = emissive_on;
 
-            oapiSetMaterial(hdevmesh0, 1, emissive_color);
+            oapiSetMaterial(hdevmesh0, 1, &emissive_color);
         } else {
 
-            emissive_color->emissive = emissive_off;
+            emissive_color.emissive = emissive_off;
 
-            oapiSetMaterial(hdevmesh0, 1, emissive_color);
+            oapiSetMaterial(hdevmesh0, 1, &emissive_color);
 
         }
 
         if(floats == false && brake_hold){
 
-            emissive_color->emissive = emissive_on;
+            emissive_color.emissive = emissive_on;
 
-            oapiSetMaterial(hdevmesh0, 2, emissive_color);
+            oapiSetMaterial(hdevmesh0, 2, &emissive_color);
 
         } else {
 
-            emissive_color->emissive = emissive_off;
+            emissive_color.emissive = emissive_off;
 
-            oapiSetMaterial(hdevmesh0, 2, emissive_color);
+            oapiSetMaterial(hdevmesh0, 2, &emissive_color);
 
         }
 
@@ -122,25 +122,25 @@ void R4::SetPretty_StatusLights(){
 
 void R4::SetPretty_HelicopterColor(){
 
-    if(color != NULL){
+    if(color.a != 0){
 
         if(hdevmesh0 != NULL){
 
-            mat_color->diffuse = *color;
-            mat_color->ambient = *color;
-            mat_color->specular = *color;
+            mat_color.diffuse = color;
+            mat_color.ambient = color;
+            mat_color.specular = color;
 
-            oapiSetMaterial(hdevmesh0, 3, mat_color);
+            oapiSetMaterial(hdevmesh0, 3, &mat_color);
 
         }
 
         if(hdevmesh1 != NULL){
 
-            mat_color->diffuse = *color;
-            mat_color->ambient = *color;
-            mat_color->specular = *color;
+            mat_color.diffuse = color;
+            mat_color.ambient = color;
+            mat_color.specular = color;
 
-            oapiSetMaterial(hdevmesh1, 0, mat_color);
+            oapiSetMaterial(hdevmesh1, 0, &mat_color);
         }
 
     }
@@ -171,19 +171,19 @@ void R4::SetPretty_CockpitGlow(){
 
     if(hdevmesh0 != NULL){
 
-        for(int i = 0; i < sizeof(cockpit_material); i++){
+        for(int i = 0; i < 12; i++){
             
-            cockpit_lights_emissive->emissive = cockpit_lights_emissive_color;
+            cockpit_lights_emissive.emissive = cockpit_lights_emissive_color;
 
-            oapiSetMaterial(hdevmesh0, cockpit_material[i], cockpit_lights_emissive);
+            oapiSetMaterial(hdevmesh0, cockpit_material[i], &cockpit_lights_emissive);
 
         }
 
-        for(int i = 0; i < sizeof(orange_material); i++){
+        for(int i = 0; i < 10; i++){
 
-            orange_mat->emissive = orange_lights_emissive_color;
+            orange_mat.emissive = orange_lights_emissive_color;
 
-            oapiSetMaterial(hdevmesh0, orange_material, orange_mat);
+            oapiSetMaterial(hdevmesh0, orange_material, &orange_mat);
 
         }
     

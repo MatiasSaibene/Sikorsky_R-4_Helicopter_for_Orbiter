@@ -126,6 +126,13 @@ void R4::SetAnim_Tachometer(){
 
 }
 
+void R4::SetAnim_CollectiveIndicator(){
+
+    MainRotorSpec main_rotor_spec;
+
+    SetAnimation(anim_collective_indicator, main_rotor_spec.prop_eff);
+}
+
 void R4::SetAnim_FuelIndicator(){
 
     SetAnimation(anim_fuel_indicator, GetPropellantMass(main_fuel_tank)/main_fuel_tank_max);

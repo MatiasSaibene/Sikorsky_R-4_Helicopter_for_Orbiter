@@ -1,8 +1,7 @@
 #include "R4.h"
 
-double R4::GetPropeller_Thrust(EngStruct, double power, double V_0){
-
-    EngStruct propeller_spec;
+template <typename T>
+double R4::GetPropeller_Thrust(const T &propeller_spec, double power, double V_0){
 
     double V_E = 0;
 
@@ -49,11 +48,11 @@ double R4::GetPropeller_Thrust(EngStruct, double power, double V_0){
     //yields a cubic polynomial expression for V_E with a single real root. The following finds the
     //corresponding value of this root at V_E and solves for the thrust.
 
-    double Y[1];
+    double Y[351];
 
     Y[0] = D;
 
-    for(int i = 0; i < 350; i++){
+    for(int i = 1; i < 350; i++){
 
         Y[i] = (A * i * i * i) + (B * i * i) + (C * i) + D;
 
@@ -81,3 +80,7 @@ double R4::GetPropeller_Thrust(EngStruct, double power, double V_0){
     return thrust;
 
 }
+
+template double R4::GetPropeller_Thrust<R4::MainRotorSpec>(const MainRotorSpec&, double, double);
+
+template double R4::GetPropeller_Thrust<R4::TailRotorSpec>(const TailRotorSpec&, double, double);

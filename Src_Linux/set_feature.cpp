@@ -11,7 +11,7 @@ void R4::SetFeature_SetContactPointsWheels(){
 
     double damping_value = sqrt((empty_mass+main_fuel_tank_max) * stiffness_value);
 
-    std::array<VECTOR3, 13> pos = {
+    std::array<VECTOR3, 13> wheels_pos = {
          VECTOR3{operator-(tail_wheel_contact, cg)}, //tail wheel
 
          VECTOR3{operator-(right_main_wheel_contact, cg)}, //right wheel
@@ -40,11 +40,11 @@ void R4::SetFeature_SetContactPointsWheels(){
 
     };
 
-    TOUCHDOWNVTX td_points[sizeof(pos)];
+    TOUCHDOWNVTX td_points[13];
 
-    for(int i = 0; i < sizeof(pos); i++){
+    for(int i = 0; i < 13; i++){
 
-        td_points[i].pos = pos[i];
+        td_points[i].pos = wheels_pos[i];
         td_points[i].stiffness = stiffness_value;
         td_points[i].damping = damping_value;
         td_points[i].mu = 1.0;
@@ -60,7 +60,7 @@ void R4::SetFeature_SetContactPointsWheels(){
         }
 
     }
-    SetTouchdownPoints(td_points, sizeof(pos));
+    SetTouchdownPoints(td_points, 13);
 
 }
 
@@ -97,13 +97,12 @@ void R4::SetFeature_MakeContactPointsFloats(){
     pos[20] = operator-(_V(0.46431, -0.49492, 2.093), cg);
 
     //Make touchdown points table for pontoons on dry land
-    //TOUCHDOWNVTX td_points_pontoon_land[sizeof(pos)];
 
     double stiffness_value_pontoon_land = ((empty_mass + main_fuel_tank_max) * G) / (0.01 * n_points);
 
     double damping_value_pontoon_land = std::sqrt((empty_mass + main_fuel_tank_max) * stiffness_value_pontoon_land / n_points);
 
-    for(int i = 0; i < sizeof(pos); i++){
+    for(int i = 0; i < 4; i++){
 
         td_points_pontoon_land[i].pos = pos[i];
 
@@ -119,7 +118,7 @@ void R4::SetFeature_MakeContactPointsFloats(){
 
     //Make touchdown points table for pontoons on water
 
-    TOUCHDOWNVTX td_points_pontoon_water[sizeof(pos)];
+    TOUCHDOWNVTX td_points_pontoon_water[4];
 
     double dA = (2 * pontoon_length * pontoon_dia) / n_points;
 
@@ -261,7 +260,7 @@ void R4::SetFeature_CrashOrSplash(){
     if(elevation >= 1){ //over ground
 
         water = false;
-        SetTouchdownPoints(td_points_pontoon_land, sizeof(pos));
+        SetTouchdownPoints(td_points_pontoon_land, 4);
 
     }
 

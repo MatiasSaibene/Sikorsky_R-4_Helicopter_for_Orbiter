@@ -1,7 +1,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 #include <string>
+#include <strings.h>
 #define ORBITER_MODULE
 #include "R4.h"
 
@@ -34,7 +37,6 @@ void LiftFlatPlate(VESSEL *v, double aoa, double M, double Re, void *context, do
 R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
 
     //Initialize variables...
-    hmesh = NULL;
 
     ui_hmesh = 0;
 
@@ -126,9 +128,13 @@ R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
 
     anim_tail_wheel = 0;
 
-    beaconspec = nullptr;
+    for(int i = 0; i < 3; i++){
 
-    searchlight_beaconspec = nullptr;
+        beaconspec[i] = {0};
+
+    }
+
+    searchlight_beaconspec[0] = {0};
 
     message1_annotation = nullptr;
     message2_annotation = nullptr;
@@ -145,6 +151,93 @@ R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
     message13_annotation = nullptr;
     message14_annotation = nullptr;
     message15_annotation = nullptr;
+
+    hfuselage = nullptr;
+    
+    hgear = nullptr;
+
+    hfloats = nullptr;
+    
+    hdevmesh0 = nullptr;
+
+    hdevmesh1 = nullptr;
+
+    diffusive_color = {0};
+
+    emissive_color = {0};
+
+    mat_color = {0};
+
+    cockpit_lights_emissive = {0};
+
+    orange_mat = {0};
+
+    color = {0};
+
+    beaconlight = nullptr;
+
+    searchlight_spec = nullptr;
+
+    cabinlight = nullptr;
+
+    vi = nullptr;
+
+    hR4 = nullptr;
+
+    pitch = 0.0;
+
+    roll = 0.0;
+
+    bank = 0.0;
+
+    main_rotor_anim_state = 0.0;
+
+    tail_rotor_anim_state = 0.0;
+
+    airspeed_anim_state = 0.0;
+
+    altimeter_10k_anim_state = 0.0;
+
+    altimeter_1k_anim_state = 0.0;
+
+    compass_anim_state = 0.0;
+
+    vertical_speed_anim_state = 0.0;
+
+    left_wheel_anim_state = 0.0;
+
+    left_wheel_anim_state = 0.0;
+
+    right_wheel_anim_state = 0.0;
+    
+    tail_wheel_strut_anim_state = 0.0;
+
+    tail_wheel_anim_state = 0.0;
+
+    floats = false;
+
+    water = false;
+
+    throttle_level = 0.0;
+
+    collective_input = 0.0;
+
+    tail_rotor_dir = 0.0;
+
+    power = 0.0;
+
+    torque = 0.0;
+
+    rpm = 0.0;
+
+    efficiency = 0.0;
+
+    for(int i = 0; i < 4; i++){
+
+        td_points_pontoon_land[i] = {0};
+
+    }
+
 
 
     //Initial control settings
@@ -181,8 +274,6 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
     main_fuel_tank = CreatePropellantResource(main_fuel_tank_max);
 
     SetPMI(_V(2, 2, 2));
-
-    SetContactPoints();
 
     double efficiency = GetEngine_OttoEfficiency(_engine_spec); //get thermal efficiency of engine
 
@@ -232,6 +323,130 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
 }
 
+void R4::clbkLoadStateEx(FILEHANDLE scn, void *vs){
+
+    MainRotorSpec main_rotor_spec;
+    char *line;
+
+    while(oapiReadScenario_nextline(scn, line)){
+
+        if(!strncasecmp(line, "floats", 6)){
+            
+            char boolvalue[10];
+            sscanf(line + 6, "%9s", boolvalue);
+
+            if(!strncasecmp(boolvalue, "true", 4)){
+                
+                floats = true;
+
+            } else if(!strncasecmp(boolvalue, "false", 5)){
+
+                floats = false;
+
+            }
+
+        } else if (!strncasecmp(line, "color", 5)) {
+            double r, g, b, a;
+        
+            if (sscanf(line + 5, " {r=%lf,g=%lf,b=%lf,a=%lf}", &r, &g, &b, &a) == 4) {
+                color = COLOUR4{static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a)};
+            }
+
+        } else if(!strncasecmp(line, "brake_hold", 10)){
+            char boolvalue[10];
+            sscanf(line+10, "%9s", boolvalue);
+
+            if(strncasecmp(boolvalue, "true", 4)){
+
+                brake_hold = true;
+
+            } else if(!strncasecmp(boolvalue, "false", 5)){
+
+                brake_hold = false;
+
+            }
+        } else if(!strncasecmp(line, "engine_on", 9)){
+            char boolvalue[10];
+            sscanf(line+9, "%9s", boolvalue);
+
+            if(strncasecmp(boolvalue, "true", 4)){
+
+                engine_on = true;
+
+            } else if(!strncasecmp(boolvalue, "false", 5)){
+
+                engine_on = false;
+
+            }
+        } else if(!strncasecmp(line, "lights_on", 9)){
+            char boolvalue[10];
+            sscanf(line+9, "%9s", boolvalue);
+
+            if(strncasecmp(boolvalue, "true", 4)){
+
+                lights_on = true;
+
+            } else if(!strncasecmp(boolvalue, "false", 5)){
+
+                lights_on = false;
+
+            }
+        } else if(!strncasecmp(line, "altitude_hold", 13)){
+            char boolvalue[10];
+            sscanf(line+13, "%9s", boolvalue);
+
+            if(strncasecmp(boolvalue, "true", 4)){
+
+                altitude_hold = true;
+
+            } else if(!strncasecmp(boolvalue, "false", 5)){
+
+                altitude_hold = false;
+
+            }
+        } else if(!strncasecmp(line, "altitude_target", 15)){
+            double doublevalue;
+            sscanf(line+15, "%lf", &doublevalue);
+
+            altitude_target = doublevalue;
+
+        } else if(!strncasecmp(line, "rpm", 3)){
+            double doublevalue;
+            sscanf(line+3, "%lf", &doublevalue);
+
+            rpm = doublevalue;
+
+        } else if(!strncasecmp(line, "throttle_level", 14)){
+            double doublevalue;
+            sscanf(line+14, "%lf", &doublevalue);
+
+            throttle_level = doublevalue;
+        } else if(!strncasecmp(line, "collective", 10)){
+            double doublevalue;
+            sscanf(line+10, "%lf", &doublevalue);
+
+            main_rotor_spec.prop_eff = doublevalue;
+
+        } else if(!strncasecmp(line, "cabin_light_level", 17)){
+            double doublevalue;
+            sscanf(line+17, "%lf", &doublevalue);
+
+            cabin_light_level = doublevalue;
+        } else if(!strncasecmp(line, "instrument_light_level", 22)){
+            double doublevalue;
+            sscanf(line+22, "%lf", &doublevalue);
+
+            instrument_light_level = doublevalue;
+        } else {
+
+            ParseScenarioLineEx(line, vs);
+
+        }
+
+    }
+
+}
+
 void R4::clbkPostCreation(){
 
     hfuselage = oapiLoadMeshGlobal(FUS_MESH_NAME);
@@ -272,7 +487,7 @@ void R4::clbkPostCreation(){
 
         SetFeature_MakeContactPointsFloats();
         
-        SetTouchdownPoints(td_points_pontoon_land, sizeof(pos));
+        SetTouchdownPoints(td_points_pontoon_land, 4);
     }
 
 }
@@ -286,6 +501,180 @@ void R4::clbkVisualCreated(VISHANDLE vis, int refcount){
     SetPretty_CabinLights();
     SetPretty_CockpitGlow();
     SetPretty_HelicopterColor();
+
+}
+
+bool R4::clbkLoadVC(int id){
+
+    SetCameraMovement(_V(0, 0, 0.05), 0, -20*RAD, _V(-0.1, 0, 0), 90*RAD, 0, _V(0.1, 0, 0), -90*RAD, 0);
+    SetCameraDefaultDirection(_V(0, 0, 1));
+
+    switch(id){
+
+        case 0 : 
+            SetCameraOffset(camera_loc[1]);
+            oapiVCSetNeighbours(-1, 1, -1, -1);
+        break;
+
+        case 1:
+            SetCameraOffset(camera_loc[2]);
+            oapiVCSetNeighbours(0, 2, -1, -1);
+        break;
+
+        case 2:
+            SetCameraOffset(camera_loc[3]);
+            oapiVCSetNeighbours(1, -1, -1, -1);
+        break;
+
+    }
+
+    return true;
+}
+
+void R4::clbkFocusChanged(bool getfocus, OBJHANDLE hNewVessel, OBJHANDLE hOldVessel){
+
+    if(getfocus){
+
+        SetAnnotation_Messages(show_help);
+
+    } else {
+
+        SetAnnotation_Messages(getfocus);
+
+    }
+
+}
+
+void R4::clbkPreStep (double simt, double simdt, double mjd){
+
+    
+    TailRotorSpec tail_rotor_spec;
+    MainRotorSpec main_rotor_spec;
+    GasTurbine_EngineSpec engine_spec;
+    VECTOR3 airspd = _V(0, 0, 0);
+    GetAirspeedVector(FRAME_LOCAL, airspd);
+
+    //Get flight control inputs
+
+    pitch = GetControlSurfaceLevel(AIRCTRL_ELEVATOR);
+
+    roll = GetControlSurfaceLevel(AIRCTRL_AILERON);
+
+    tail_rotor_dir = -GetControlSurfaceLevel(AIRCTRL_RUDDER);
+
+    tail_rotor_spec.prop_eff = std::abs(tail_rotor_dir);
+
+    throttle_level = GetThrusterGroupLevel(THGROUP_MAIN);
+
+    main_rotor_spec.prop_eff = GetThrusterGroupLevel(THGROUP_HOVER);
+    
+    //Set engine power and rotor thrust
+
+    GetEngine_ReciprocatingPower(efficiency, engine_spec, main_fuel_tank, throttle_level);
+
+    double main_rotor_thrust = GetPropeller_Thrust(main_rotor_spec, 0.9 * power, airspd.y);
+
+    main_rotor_thrust_vec = GetHelp_Rotate(_V(0, main_rotor_thrust, 0), pitch * 6 * RAD, 0, roll * 6 * RAD);
+
+    AddForce(main_rotor_thrust_vec, operator-(main_rotor_axis, cg));
+
+    //Main rotor axial torque (realistic, but hard to fly with keyboard)
+
+    //main_rotor_torque = main_engine_torque/main_rotor_ratio
+
+    //vi:add_force({x=0, y=0, z=-main_rotor_torque}, {x= 0.5, y=main_rotor_axis.y, z=main_rotor_axis.z})
+    //vi:add_force({x=0, y=0, z= main_rotor_torque}, {x=-0.5, y=main_rotor_axis.y, z=main_rotor_axis.z})
+
+    //Get tail rotor thrust and net torque
+    double tail_rotor_thrust = GetPropeller_Thrust(tail_rotor_spec, 0.1 * power, airspd.x);
+
+    VECTOR3 tail_rotor_thrust_vec = _V(tail_rotor_dir * tail_rotor_thrust, 0, 0);
+
+    VECTOR3 tail_rotor_torque = crossp(tail_rotor_thrust_vec, tail_rotor_axis);
+
+
+    AddForce(_V(0, 0, tail_rotor_torque.y), _V(0.5, main_rotor_axis.y, main_rotor_axis.z));
+
+    AddForce(_V(0, 0, -tail_rotor_torque.y), _V(-0.5, main_rotor_axis.y, main_rotor_axis.z));
+
+    
+    //Get drag force on fuselage
+
+    GetPhysics_Drag();
+
+    //Set altitude hold autopilot
+
+    SetAutopilot_Altitude();
+
+    //Set contact points if using floats on either land or water
+
+    if(floats == true){
+
+        SetFeature_CrashOrSplash();
+
+    }
+
+    //Set wheel forces and animations
+
+    if(GroundContact()){
+
+        if(floats == false){
+
+            SetFeature_SetRollingWheels();
+
+            SetFeature_ParkingBrake();
+
+            SetAnim_MainWheels();
+
+            SetAnim_TailWheel();
+
+        } else if(floats == true){
+
+            if(water == false){
+
+                SetAngularVel(_V(0, 0, 0));
+
+            }
+
+        }
+
+    }
+
+    //Set animations
+
+    SetAnim_MainRotor();
+    SetAnim_TailRotor();
+    SetAnim_AirspeedIndicator();
+    SetAnim_Tachometer();
+    SetAnim_Altimeter();
+    SetAnim_Compass();
+    SetAnim_VerticalSpeed();
+    SetAnim_ArtificialHorizon();
+    SetAnim_FuelIndicator();
+    SetAnim_CollectiveIndicator();
+    
+    //Set lights
+    SetPretty_StatusLights();
+
+    if(lights_switched == true){
+
+        SetPretty_NavLights(lights_on);
+
+        SetPretty_SearchLight(lights_on);
+
+    }
+
+    if(light_level_switched == true){
+
+        SetPretty_ClearWindows(); //control inner window reflections
+
+        SetPretty_CabinLights();
+
+        SetPretty_CockpitGlow();
+
+        light_level_switched = false;
+
+    }
 
 }
 
@@ -338,9 +727,9 @@ void R4::clbkSaveState(FILEHANDLE scn){
 
     oapiWriteScenario_string(scn, "float", boolfloats);
 
-    if(color != NULL){
+    if(color.a != 0){
 
-        std::string colorStr = std::format("{{r={},g={},b={},a={}}}", color->r, color->g, color->b, color->a);
+        std::string colorStr = std::format("{{r={},g={},b={},a={}}}", color.r, color.g, color.b, color.a);
 
         oapiWriteScenario_string(scn, "color", colorStr.c_str());
 
@@ -502,4 +891,32 @@ int R4::clbkConsumeDirectKey(char *kstate){
     }
 
     return 0;
+}
+
+////////////////////////
+
+DLLCLBK void InitModule(MODULEHANDLE hModule){
+
+
+}
+
+DLLCLBK void ExitModule(MODULEHANDLE *hModule){
+
+}
+
+
+
+///////////////Vessel initialization
+
+DLLCLBK VESSEL *ovcInit(OBJHANDLE hvessel, int flightmodel){
+    
+	return new R4(hvessel, flightmodel);
+
+}
+
+/////////////Vessel memory cleanup
+DLLCLBK void ovcExit(VESSEL *vessel){
+    
+	if(vessel) delete(R4*)vessel;
+	
 }

@@ -19,9 +19,9 @@ const double LB = 0.4538; //multiply this by mass in lbm to get kg
 
 const char *const FUS_MESH_NAME = "R-4/Fuselage";
 
-const char *const GEAR_MESH_NAME = "R-4/Gear";
+const char *const GEAR_MESH_NAME = "R-4/Gears";
 
-const char *const FLOAT_MESH_NAME = "R-4/Gear";
+const char *const FLOAT_MESH_NAME = "R-4/Floats";
 
 
 //Vessel properties (R-4, https://en.wikipedia.org/wiki/Sikorsky_R-4, https://www.nationalmuseum.af.mil/Visit/Museum-Exhibits/Fact-Sheets/Display/Article/195868/sikorsky-r-4b-hoverfly/)
@@ -82,16 +82,6 @@ class R4 : public VESSEL4{
             double AF = 77.1; //air fuel ratio (mass air/mass fuel) (stochiometric ~14.6:1 for typical liquid fuels)
         };
 
-        //Dummy struct
-        struct EngStruct{
-            double diameter = 0.0;
-
-            double prop_eff = 0.0;
-
-            std::string fluid = "";
-
-            double rp = 0.0;
-        };
 
         //Rotor diameters (R-4)
         struct MainRotorSpec{
@@ -102,6 +92,7 @@ class R4 : public VESSEL4{
 
             std::string fluid = "air"; //options: "air", "water", "sea_water"
 
+            double rp = 0.0;
         };
 
         struct TailRotorSpec{
@@ -119,8 +110,12 @@ class R4 : public VESSEL4{
         int clbkConsumeDirectKey(char *kstate) override;
         void clbkPostCreation() override;
         void clbkVisualCreated(VISHANDLE vis, int refcount) override;
+        void clbkPreStep (double simt, double simdt, double mjd) override;
+        bool clbkLoadVC(int id) override;
+        void clbkFocusChanged (bool getfocus, OBJHANDLE hNewVessel, OBJHANDLE hOldVessel) override;
         void clbkVisualDestroyed(VISHANDLE vis, int refcount) override;
         void clbkSaveState(FILEHANDLE scn) override;
+        void clbkLoadStateEx(FILEHANDLE scn, void *vs) override;
 
         void SetFeature_SetContactPointsWheels();
         void SetFeature_MakeContactPointsFloats();
@@ -159,6 +154,7 @@ class R4 : public VESSEL4{
         void SetAnim_VerticalSpeed();
         void SetAnim_ArtificialHorizon();
         void SetAnim_Tachometer();
+        void SetAnim_CollectiveIndicator();
         void SetAnim_FuelIndicator();
         void SetAnim_MainWheels();
         void SetAnim_TailWheel();
@@ -180,7 +176,8 @@ class R4 : public VESSEL4{
         void SetAnnotation_Messages(bool show_help);
         void MakeAnnotation_Messages();
 
-        double GetPropeller_Thrust(EngStruct, double, double);
+        template <typename T>
+        double GetPropeller_Thrust(const T &rotor_spec, double, double);
 
         void SetPretty_NavLights(bool lights_on);
         void SetPretty_SearchLight(bool lights_on);
@@ -197,24 +194,25 @@ class R4 : public VESSEL4{
 
         MESHHANDLE hfuselage, hgear, hfloats;
         DEVMESHHANDLE hdevmesh0, hdevmesh1;
-        MATERIAL *diffusive_color;
-        MATERIAL *emissive_color;
-        MATERIAL *mat_color;
-        MATERIAL *cockpit_lights_emissive;
-        MATERIAL *orange_mat;
-        COLOUR4 *color;
+        MATERIAL diffusive_color;
+        MATERIAL emissive_color;
+        MATERIAL mat_color;
+        MATERIAL cockpit_lights_emissive;
+        MATERIAL orange_mat;
+        COLOUR4 color;
         THRUSTER_HANDLE th_dummy, thg_dummy, th_hover, thg_hover;
         PROPELLANT_HANDLE main_fuel_tank;
         unsigned int ui_hmesh;
-        BEACONLIGHTSPEC *beaconspec;
-        BEACONLIGHTSPEC *searchlight_beaconspec;
+        BEACONLIGHTSPEC beaconspec[3];
+        BEACONLIGHTSPEC searchlight_beaconspec[1];
         LightEmitter *beaconlight;
         LightEmitter *searchlight_spec;
         LightEmitter *cabinlight;
         VESSEL *vi;
         OBJHANDLE hR4;
-
         NOTEHANDLE message1_annotation, message2_annotation, message3_annotation, message4_annotation, message5_annotation, message6_annotation, message7_annotation, message8_annotation, message9_annotation, message10_annotation, message11_annotation, message12_annotation, message13_annotation, message14_annotation, message15_annotation;
+
+        double pitch, roll, bank;
 
         unsigned int anim_main_rotor;
         unsigned int anim_main_blade_1;
@@ -290,6 +288,8 @@ class R4 : public VESSEL4{
 
         double rpm;
 
+        double efficiency;
+
         //Main vessel locations for animations, useful mesh dimensions, etc..
 
         VECTOR3 main_rotor_axis = {0, 1.5862, 0};
@@ -359,7 +359,7 @@ class R4 : public VESSEL4{
     
             VECTOR3{operator-(_V(right_pontoon_front.x, right_pontoon_front.y, pontoon_length / 2), cg)}
         };
-        TOUCHDOWNVTX td_points_pontoon_land[sizeof(pos)];
+        TOUCHDOWNVTX td_points_pontoon_land[4];
 
         //Camera viewpoints
 
