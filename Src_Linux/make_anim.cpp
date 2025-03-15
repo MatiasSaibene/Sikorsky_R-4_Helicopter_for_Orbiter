@@ -3,8 +3,6 @@
 
 void R4::MakeAnim_MainRotor(){
 
-    ANIMATIONCOMPONENT_HANDLE parent;
-
     static unsigned int MainRotorGrp[2] = {33, 36};
     static MGROUP_ROTATE main_rotor(
         0,
@@ -17,7 +15,7 @@ void R4::MakeAnim_MainRotor(){
 
     anim_main_rotor = CreateAnimation(0.0);
 
-    parent = AddAnimationComponent(anim_main_rotor, 0, 1, &main_rotor);
+    ANIMATIONCOMPONENT_HANDLE parent = AddAnimationComponent(anim_main_rotor, 0, 1, &main_rotor);
 
     static unsigned int MainBlade1PitchGrp[2] = {37, 39};
 
@@ -38,7 +36,7 @@ void R4::MakeAnim_MainRotor(){
         MainBlade2PitchGrp,
         2,
         _V(0, 1.5862, 0),
-        _V(0.8660, 0, 0.5),
+        _V(0.8660, 0, 0.500),
         (float)(-15*RAD)
     );
 
@@ -49,7 +47,7 @@ void R4::MakeAnim_MainRotor(){
         MainBlade3PitchGrp,
         2,
         main_rotor_axis,
-        _V(-0.8660, 0, 0.5),
+        _V(-0.8660, 0, 0.5000),
         (float)(-15*RAD)
     );
 
@@ -65,22 +63,20 @@ void R4::MakeAnim_MainRotor(){
 
 void R4::MakeAnim_TailRotor(){
 
-    ANIMATIONCOMPONENT_HANDLE parent;
-
-    static unsigned int TailRotorGrp[1] = {41};
+    static unsigned int TailRotorGrp = 41;
 
     static MGROUP_ROTATE tail_rotor(
         0,
-        TailRotorGrp,
+        &TailRotorGrp,
         1,
         tail_rotor_axis,
         _V(1, 0, 0),
-        (float)(360*RAD)
+        (float)(-360*RAD)
     );
 
     anim_tail_rotor = CreateAnimation(0.0);
 
-    parent = AddAnimationComponent(anim_tail_rotor, 0, 1, &tail_rotor);
+    ANIMATIONCOMPONENT_HANDLE parent = AddAnimationComponent(anim_tail_rotor, 0, 1, &tail_rotor);
 
     static unsigned int TailBlade1PitchGrp[2] = {44, 46};
 
@@ -127,12 +123,12 @@ void R4::MakeAnim_TailRotor(){
 
 void R4::MakeAnim_AirspeedIndicator(){
 
-    static unsigned int AirspeedGrp[1] = {21};
+    static unsigned int AirspeedGrp = 21;
     anim_airspeed = CreateAnimation(0.0);
 
     static MGROUP_ROTATE airspeed(
         0,
-        AirspeedGrp,
+        &AirspeedGrp,
         1,
         airspeed_needle_location,
         indicator_axis,
@@ -145,13 +141,13 @@ void R4::MakeAnim_AirspeedIndicator(){
 
 void R4::MakeAnim_Altimeter(){
 
-    static unsigned int altimeter_1kGRP[1] = {19};
+    static unsigned int altimeter_1kGRP = 19;
 
     anim_altimeter_1k = CreateAnimation(0.0);
 
     static MGROUP_ROTATE altimeter_1k(
         0,
-        altimeter_1kGRP,
+        &altimeter_1kGRP,
         1,
         altimeter_needle_location,
         indicator_axis,
@@ -160,13 +156,13 @@ void R4::MakeAnim_Altimeter(){
 
     AddAnimationComponent(anim_altimeter_1k, 0, 1, &altimeter_1k);
 
-    static unsigned int altimeter_10kGRP[1] = {20};
+    static unsigned int altimeter_10kGRP = 20;
 
     anim_altimeter_10k = CreateAnimation(0.0);
 
     static MGROUP_ROTATE altimeter_10k(
         0,
-        altimeter_10kGRP,
+        &altimeter_10kGRP,
         1,
         altimeter_needle_location,
         indicator_axis,
@@ -181,11 +177,11 @@ void R4::MakeAnim_Compass(){
 
     anim_compass = CreateAnimation(0.0);
 
-    static unsigned int compassGrp[1] = {10};
+    static unsigned int compassGrp = 10;
 
     static MGROUP_ROTATE compass(
         0,
-        compassGrp,
+        &compassGrp,
         1,
         compass_wheel_location,
         indicator_axis,
@@ -198,49 +194,49 @@ void R4::MakeAnim_Compass(){
 
 void R4::MakeAnim_VerticalSpeed(){
 
-    static unsigned int vertical_speedGrp[1] = {22};
+    static unsigned int vertical_speedGrp = 22;
 
     anim_vertical_speed = CreateAnimation(0.0);
 
     static MGROUP_ROTATE vertical_speed(
         0,
-        vertical_speedGrp,
+        &vertical_speedGrp,
         1,
         vertical_speed_needle_location,
         indicator_axis,
         (float)(344*RAD)
     );
+
+    AddAnimationComponent(anim_vertical_speed, -1, 1, &vertical_speed);
 }
 
 void R4::MakeAnim_ArtificialHorizon(){
 
-    ANIMATIONCOMPONENT_HANDLE parent;
-
-    static unsigned int horizon_circleGrp[1] = {14};
+    static unsigned int horizon_circleGrp = 14;
 
     anim_horizon_circle = CreateAnimation(0.0);
 
     static MGROUP_ROTATE horizon_circle(
         0,
-        horizon_circleGrp,
+        &horizon_circleGrp,
         1,
         horizon_circle_location,
         indicator_axis,
         (float)(-360*RAD)
     );
 
-    static unsigned int horizon_ball_pitchGrp[1] = {13};
+    static unsigned int horizon_ball_pitchGrp = 13;
 
     anim_horizon_ball_pitch = CreateAnimation(0.5);
 
     auto horizon_ball_pitch = new MGROUP_TRANSLATE(
         0,
-        horizon_ball_pitchGrp,
+        &horizon_ball_pitchGrp,
         1,
         GetHelp_RotatePitch(_V(0, 0.034, 0), dash_angle)
     );
 
-    parent = AddAnimationComponent(anim_horizon_circle, 0, 1, &horizon_circle);
+    ANIMATIONCOMPONENT_HANDLE parent = AddAnimationComponent(anim_horizon_circle, 0, 1, &horizon_circle);
 
     AddAnimationComponent(anim_horizon_ball_pitch, 0, 1, horizon_ball_pitch, parent);
 
@@ -248,13 +244,13 @@ void R4::MakeAnim_ArtificialHorizon(){
 
 void R4::MakeAnim_Tachometer(){
 
-    static unsigned int anim_tachometerGrp[1] = {23};
+    static unsigned int anim_tachometerGrp = 23;
 
     anim_tachometer = CreateAnimation(0.0);
 
     static MGROUP_ROTATE tachometer(
         0,
-        anim_tachometerGrp,
+        &anim_tachometerGrp,
         1,
         tachometer_needle_location,
         indicator_axis,
@@ -267,13 +263,13 @@ void R4::MakeAnim_Tachometer(){
 
 void R4::MakeAnim_FuelIndicator(){
     
-    static unsigned int fuel_indicatorGrp[1] = {24};
+    static unsigned int fuel_indicatorGrp = 24;
 
     anim_fuel_indicator = CreateAnimation(0.0);
 
     static MGROUP_ROTATE fuel_indicator(
         0,
-        fuel_indicatorGrp,
+        &fuel_indicatorGrp,
         1,
         fuel_indicator_needle_location,
         indicator_axis,
@@ -286,13 +282,13 @@ void R4::MakeAnim_FuelIndicator(){
 
 void R4::MakeAnim_CollectiveIndicator(){
 
-    static unsigned int anim_collective_indicatorGrp[1] = {6};
+    static unsigned int anim_collective_indicatorGrp = 6;
 
     anim_collective_indicator = CreateAnimation(0.0);
 
     static MGROUP_TRANSLATE collective_indicator(
         0,
-        anim_collective_indicatorGrp,
+        &anim_collective_indicatorGrp,
         1,
         GetHelp_RotatePitch(_V(0, 0.0405, 0), dash_angle)
     );
@@ -337,13 +333,11 @@ void R4::MakeAnim_MainWheels(){
 
 void R4::MakeAnim_TailWheel(){
 
-    ANIMATIONCOMPONENT_HANDLE parent;
-
-    static unsigned int tail_wheel_strutGrp[1] = {5};
+    static unsigned int tail_wheel_strutGrp = 5;
 
     static MGROUP_ROTATE tail_wheel_strut(
         1,
-        tail_wheel_strutGrp,
+        &tail_wheel_strutGrp,
         1,
         tail_wheel_axis,
         _V(0, 1, 0),
@@ -352,7 +346,7 @@ void R4::MakeAnim_TailWheel(){
 
     anim_tail_wheel_strut = CreateAnimation(0.0);
 
-    parent = AddAnimationComponent(anim_tail_wheel_strut, -1, 1, &tail_wheel_strut);
+    ANIMATIONCOMPONENT_HANDLE parent = AddAnimationComponent(anim_tail_wheel_strut, -1, 1, &tail_wheel_strut);
 
     static unsigned int tail_wheelGrp[2] = {6, 7};
 

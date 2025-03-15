@@ -38,7 +38,7 @@ R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
 
     //Initialize variables...
 
-    ui_hmesh = 0;
+    main_rotor_thrust_vec = _V(0, 0, 0);
 
     main_fuel_tank = nullptr;
 
@@ -275,13 +275,13 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
     SetPMI(_V(2, 2, 2));
 
-    double efficiency = GetEngine_OttoEfficiency(_engine_spec); //get thermal efficiency of engine
+    efficiency = GetEngine_OttoEfficiency(_engine_spec); //get thermal efficiency of engine
 
     SetRotDrag(_V(0.5, 0.5, 0.5));
 
     //Define vertical stabilizer
 
-    CreateAirfoil3(LIFT_HORIZONTAL, tail_rotor_axis, LiftFlatPlate, 0, 2, 4, 4);
+    CreateAirfoil3(LIFT_HORIZONTAL, tail_rotor_axis, LiftFlatPlate, 0, 4, 4, 0.25);
 
     //Define artificial ailerons, elevator, and rudder to take control inputs
 
@@ -294,13 +294,13 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
     //Following makes dummy thruster to take main throttle input and utilize throttle level
     //visuals in Orbiter. Major thrust forces are implemented with add_force instances.
 
-    th_dummy = CreateThruster(cg, _V(0, 1, 0), 0, main_fuel_tank, INFINITY);
+    th_dummy = CreateThruster(cg, _V(0, 1, 0), 1, main_fuel_tank, INFINITY);
 
     thg_dummy = CreateThrusterGroup(&th_dummy, 1, THGROUP_MAIN);
 
     //Following makes dummy thruster to take default hover thuster input and apply it to the collective.
 
-    th_hover = CreateThruster(cg, _V(0, 1, 0), 0, main_fuel_tank, INFINITY);
+    th_hover = CreateThruster(cg, _V(0, 1, 0), 1, main_fuel_tank, INFINITY);
 
     thg_hover = CreateThrusterGroup(&th_hover, 1, THGROUP_HOVER);
 
@@ -475,7 +475,7 @@ void R4::clbkPostCreation(){
         
         MakeAnim_TailWheel();
 
-    } else if(floats == false){
+    } else if(floats == true){
 
         hfloats = oapiLoadMeshGlobal(FLOAT_MESH_NAME);
 
@@ -487,7 +487,7 @@ void R4::clbkPostCreation(){
 
         SetFeature_MakeContactPointsFloats();
         
-        SetTouchdownPoints(td_points_pontoon_land, 4);
+        SetTouchdownPoints(td_points_pontoon_land, ntdvtx_td_points_pontoon_land);
     }
 
 }

@@ -313,7 +313,7 @@ class R4 : public VESSEL4{
 
         VECTOR3 tail_wheel_contact = operator+(tail_wheel_axis, {0, -0.5*tail_wheel_diameter, 0});
 
-        VECTOR3 main_rotor_thrust_vec = _V(0, 0, 0);
+        VECTOR3 main_rotor_thrust_vec;
 
         
         //Pontoons
@@ -350,16 +350,15 @@ class R4 : public VESSEL4{
 
         VECTOR3 fuel_indicator_needle_location = _V(0.3512, 0.0822, 2.0188);
 
-        std::array<VECTOR3, 4> pos = {
-            VECTOR3{operator-(_V(left_pontoon_front.x, left_pontoon_front.y, pontoon_length / 2), cg)},
-    
-            VECTOR3{operator-(_V(left_pontoon_rear.x, left_pontoon_rear.y, -pontoon_length / 2), cg)},
-    
-            VECTOR3{operator-(_V(right_pontoon_rear.x, right_pontoon_rear.y, -pontoon_length / 2), cg)},
-    
-            VECTOR3{operator-(_V(right_pontoon_front.x, right_pontoon_front.y, pontoon_length / 2), cg)}
-        };
-        TOUCHDOWNVTX td_points_pontoon_land[4];
+        //Touchdown points
+        static const int ntdvtx_td_points_pontoon_land = 20;
+        TOUCHDOWNVTX td_points_pontoon_land[ntdvtx_td_points_pontoon_land];
+
+        static const int ntdvtx_td_points = 13;
+        TOUCHDOWNVTX td_points[13];
+
+        static const int ntdvtx_td_points_pontoon_water = 10;
+        TOUCHDOWNVTX td_points_pontoon_water[ntdvtx_td_points_pontoon_water];
 
         //Camera viewpoints
 
