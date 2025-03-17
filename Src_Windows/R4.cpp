@@ -1,14 +1,12 @@
 #define NOMINMAX
+#define ORBITER_MODULE
 #include <algorithm>
-
-#include "HEADERS/OrbiterSDK.h"
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <format>
-#define ORBITER_MODULE
 #include "R4.h"
 
 void LiftFlatPlate(VESSEL *v, double aoa, double M, double Re, void *context, double *cl, double *cm, double *cd){
@@ -221,6 +219,8 @@ R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
 
     rpm = 0.0;
 
+    rpm_comm = 0.0;
+
     efficiency = 0.0;
 
     for(int i = 0; i < ntdvtx_td_points_pontoon_land; i++){
@@ -273,8 +273,6 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
 
     SetMeshVisibilityMode(0, MESHVIS_ALWAYS);
 
-    EngineSpec _engine_spec;
-
     /* hmesh = oapiLoadMeshGlobal(MESH_NAME);
     ui_hmesh = AddMesh(hmesh);
     SetMeshVisibilityMode(ui_hmesh, MESHVIS_ALWAYS);
@@ -283,9 +281,17 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
     SetEmptyMass(empty_mass);
     main_fuel_tank = CreatePropellantResource(main_fuel_tank_max);
 
+    th_hover = CreateThruster(cg, _V(0, 1, 0), 1, main_fuel_tank, INFINITY);
+
+    thg_hover = CreateThrusterGroup(&th_hover, 1, THGROUP_HOVER);
+
+    th_dummy = CreateThruster(cg, _V(0, 1, 0), 1, main_fuel_tank, INFINITY);
+
+    thg_dummy = CreateThrusterGroup(&th_dummy, 1, THGROUP_MAIN);
+
     SetPMI(_V(2, 2, 2));
 
-    efficiency = GetEngine_OttoEfficiency(_engine_spec); //get thermal efficiency of engine
+    efficiency = GetEngine_OttoEfficiency(); //get thermal efficiency of engine
 
     SetRotDrag(_V(0.5, 0.5, 0.5));
 
@@ -304,15 +310,8 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
     //Following makes dummy thruster to take main throttle input and utilize throttle level
     //visuals in Orbiter. Major thrust forces are implemented with add_force instances.
 
-    th_dummy = CreateThruster(cg, _V(0, 1, 0), 1, main_fuel_tank, INFINITY);
-
-    thg_dummy = CreateThrusterGroup(&th_dummy, 1, THGROUP_MAIN);
 
     //Following makes dummy thruster to take default hover thuster input and apply it to the collective.
-
-    th_hover = CreateThruster(cg, _V(0, 1, 0), 1, main_fuel_tank, INFINITY);
-
-    thg_hover = CreateThrusterGroup(&th_hover, 1, THGROUP_HOVER);
 
     MakeAnim_MainRotor();
     MakeAnim_TailRotor();
@@ -557,10 +556,6 @@ void R4::clbkFocusChanged(bool getfocus, OBJHANDLE hNewVessel, OBJHANDLE hOldVes
 
 void R4::clbkPreStep (double simt, double simdt, double mjd){
 
-    
-    TailRotorSpec tail_rotor_spec;
-    MainRotorSpec main_rotor_spec;
-    GasTurbine_EngineSpec engine_spec;
     VECTOR3 airspd = _V(0, 0, 0);
     GetAirspeedVector(FRAME_LOCAL, airspd);
 
@@ -580,9 +575,11 @@ void R4::clbkPreStep (double simt, double simdt, double mjd){
     
     //Set engine power and rotor thrust
 
-    GetEngine_ReciprocatingPower(efficiency, engine_spec, main_fuel_tank, throttle_level);
+    GetEngine_GasTurbinePower(efficiency, main_fuel_tank, throttle_level);
 
-    double main_rotor_thrust = GetPropeller_Thrust(main_rotor_spec, 0.9 * power, airspd.y);
+    double main_rotor_thrust = GetPropeller_Thrust_MainRotor(0.9 * power, airspd.y);
+
+    oapiWriteLogV("%lf", power);
 
     main_rotor_thrust_vec = GetHelp_Rotate(_V(0, main_rotor_thrust, 0), pitch * 6 * RAD, 0, roll * 6 * RAD);
 
@@ -596,7 +593,7 @@ void R4::clbkPreStep (double simt, double simdt, double mjd){
     //vi:add_force({x=0, y=0, z= main_rotor_torque}, {x=-0.5, y=main_rotor_axis.y, z=main_rotor_axis.z})
 
     //Get tail rotor thrust and net torque
-    double tail_rotor_thrust = GetPropeller_Thrust(tail_rotor_spec, 0.1 * power, airspd.x);
+    double tail_rotor_thrust = GetPropeller_Thrust_TailRotor(0.1 * power, airspd.x);
 
     VECTOR3 tail_rotor_thrust_vec = _V(tail_rotor_dir * tail_rotor_thrust, 0, 0);
 
@@ -697,6 +694,8 @@ void R4::clbkVisualDestroyed(VISHANDLE vis, int refcount){
 }
 
 void R4::clbkSaveState(FILEHANDLE scn){
+
+    SaveDefaultState(scn);
 
     MainRotorSpec main_rotor_spec;
 

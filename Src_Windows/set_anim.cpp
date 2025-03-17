@@ -128,8 +128,6 @@ void R4::SetAnim_Tachometer(){
 
 void R4::SetAnim_CollectiveIndicator(){
 
-    MainRotorSpec main_rotor_spec;
-
     SetAnimation(anim_collective_indicator, main_rotor_spec.prop_eff);
 }
 

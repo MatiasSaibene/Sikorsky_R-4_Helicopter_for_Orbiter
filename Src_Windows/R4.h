@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include "HEADERS/DrawAPI.h"
+#include "../include/DrawAPI.h"
 #include <array>
 #include <chrono>
 #include <cstddef>
 #ifndef R4_H
 #define R4_H
 
-#include "HEADERS//Orbitersdk.h"
-#include "HEADERS//OrbiterAPI.h"
+#include "../include/Orbitersdk.h"
+#include "../include/OrbiterAPI.h"
 
 const double FT = 0.3048; //multiply this by length in feet to get m
 const double LB = 0.4538; //multiply this by mass in lbm to get kg
@@ -67,6 +67,7 @@ class R4 : public VESSEL4{
             double AF = 14.6;  //air fuel ratio (mass air/mass fuel) (stochiometric ~14.6:1 for typical liquid fuels)
 
         };
+        EngineSpec engine_spec;
 
         struct GasTurbine_EngineSpec{
 
@@ -82,7 +83,7 @@ class R4 : public VESSEL4{
 
             double AF = 77.1; //air fuel ratio (mass air/mass fuel) (stochiometric ~14.6:1 for typical liquid fuels)
         };
-
+        GasTurbine_EngineSpec gas_turbine_engine_spec;
 
         //Rotor diameters (R-4)
         struct MainRotorSpec{
@@ -95,6 +96,7 @@ class R4 : public VESSEL4{
 
             double rp = 0.0;
         };
+        MainRotorSpec main_rotor_spec;
 
         struct TailRotorSpec{
 
@@ -105,6 +107,7 @@ class R4 : public VESSEL4{
             std::string fluid = "air"; //options: "air", "water", "sea_water"
 
         };
+        TailRotorSpec tail_rotor_spec;
 
         void clbkSetClassCaps(FILEHANDLE cfg) override;
         int clbkConsumeBufferedKey(DWORD key, bool down, char *kstate) override;
@@ -127,11 +130,11 @@ class R4 : public VESSEL4{
         void SetFeature_SetRightBrakeForce();
         void SetFeature_CrashOrSplash();
 
-        double GetEngine_OttoEfficiency(struct EngineSpec);
-        double GetEngine_DieselEfficiency(struct EngineSpec);
-        double GetEngine_BraytonEfficiency(struct GasTurbine_EngineSpec);
-        void GetEngine_ReciprocatingPower(double efficiency, struct GasTurbine_EngineSpec, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
-        void GetEngine_GasTurbinePower(double efficiency, struct GasTurbine_EngineSpec, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
+        double GetEngine_OttoEfficiency();
+        double GetEngine_DieselEfficiency();
+        double GetEngine_BraytonEfficiency();
+        void GetEngine_ReciprocatingPower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
+        void GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
 
 
         void MakeAnim_MainRotor();
@@ -177,8 +180,8 @@ class R4 : public VESSEL4{
         void SetAnnotation_Messages(bool show_help);
         void MakeAnnotation_Messages();
 
-        template <typename T>
-        double GetPropeller_Thrust(const T &rotor_spec, double, double);
+        double GetPropeller_Thrust_MainRotor(double power, double V_0);
+        double GetPropeller_Thrust_TailRotor(double power, double V_0);
 
         void SetPretty_NavLights(bool lights_on);
         void SetPretty_SearchLight(bool lights_on);
@@ -282,6 +285,8 @@ class R4 : public VESSEL4{
         double torque;
 
         double rpm;
+
+        double rpm_comm;
 
         double efficiency;
 

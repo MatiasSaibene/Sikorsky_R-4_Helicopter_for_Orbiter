@@ -7,11 +7,9 @@
 //--The following functions are used to calculate engine fuel efficiencies based on engine specs.
 //Should be called in clbk_setclasscaps
 
-double R4::GetEngine_OttoEfficiency(struct EngineSpec engine_spec)
+double R4::GetEngine_OttoEfficiency()
 {
-    EngineSpec _engine_spec;
-
-    double _r = _engine_spec.r;
+    double _r = engine_spec.r;
 
     double k = 1.181; //specific heat ratio for air (can tweak based on engine size to account for heat losses)
 
@@ -20,15 +18,11 @@ double R4::GetEngine_OttoEfficiency(struct EngineSpec engine_spec)
     return efficiency;
 }
 
-double R4::GetEngine_DieselEfficiency(struct EngineSpec engine_spec){
+double R4::GetEngine_DieselEfficiency(){
 
-    EngineSpec _engine_spec;
+    double _r = engine_spec.r;
 
-    double _r = _engine_spec.r;
-
-    double _rc = _engine_spec.rc;
-
-    double efficiency = 0.0;
+    double _rc = engine_spec.rc;
 
     double k = 1.2; //specific heat ratio for air (can tweak based on engine size to account for heat losses)
 
@@ -45,20 +39,18 @@ double R4::GetEngine_DieselEfficiency(struct EngineSpec engine_spec){
     return efficiency;
 }
 
-double R4::GetEngine_BraytonEfficiency(struct GasTurbine_EngineSpec engine_spec){
+double R4::GetEngine_BraytonEfficiency(){
 
-    double rp = engine_spec.rp;
+    double rp = gas_turbine_engine_spec.rp;
     double k = 1.2; //specific heat ratio for air (can tweak based on engine size to account for heat losses)
 
-    double efficiency = 1 - (1 / (pow(rp, (k-1) / k)));
+    efficiency = 1 - (1 / (pow(rp, (k-1) / k)));
 
     return efficiency;
 }
 
-void R4::GetEngine_ReciprocatingPower(double efficiency, struct GasTurbine_EngineSpec engine_spec, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
-
-    EngineSpec eng_spec;
-    
+void R4::GetEngine_ReciprocatingPower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
+   
     //Determines power and torque based on efficiency for Otto and Diesel engines
 
     //Ambient air properties
@@ -71,20 +63,17 @@ void R4::GetEngine_ReciprocatingPower(double efficiency, struct GasTurbine_Engin
 
     int max_rpm = engine_spec.max_rpm;
 
-    double displacement = eng_spec.displacement;
+    double displacement = engine_spec.displacement;
 
-    int n_stroke = eng_spec.n_stroke;
+    int n_stroke = engine_spec.n_stroke;
 
     double HV = engine_spec.HV;
 
     double AF = engine_spec.AF;
 
-    double rpm_comm = 0.0;
-
-
     if(engine_on == true){
 
-        double rpm_comm = min_rpm + throttle_level * (max_rpm - min_rpm);
+        rpm_comm = min_rpm + throttle_level * (max_rpm - min_rpm);
 
     } else if(engine_on == false && GroundContact() == false){
 
@@ -96,9 +85,9 @@ void R4::GetEngine_ReciprocatingPower(double efficiency, struct GasTurbine_Engin
 
     }
 
-    if(rpm == 0.0){
+    if(rpm == 0){
 
-        rpm = rpm + 0.002 * (rpm_comm - rpm);
+        rpm = rpm + 0.01 * (rpm_comm - rpm);
 
     } else {
 
@@ -146,9 +135,7 @@ void R4::GetEngine_ReciprocatingPower(double efficiency, struct GasTurbine_Engin
 
 }
 
-void R4::GetEngine_GasTurbinePower(double efficiency, struct GasTurbine_EngineSpec engine_spec, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
-
-    MainRotorSpec main_rotor_spec;
+void R4::GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
 
     //Determines power and torque based on efficiency for Brayton cycle turboshaft engines
 
@@ -160,17 +147,15 @@ void R4::GetEngine_GasTurbinePower(double efficiency, struct GasTurbine_EngineSp
 
     //Engine specs needed for power calculation
 
-    int min_rpm = engine_spec.min_rpm;
+    int min_rpm = gas_turbine_engine_spec.min_rpm;
     
-    int max_rpm = engine_spec.max_rpm;
+    int max_rpm = gas_turbine_engine_spec.max_rpm;
 
-    double max_air_flow = engine_spec.max_air_flow;
+    double max_air_flow = gas_turbine_engine_spec.max_air_flow;
 
-    double HV = engine_spec.HV;
+    double HV = gas_turbine_engine_spec.HV;
 
-    double AF = engine_spec.AF;
-
-    double rpm_comm;
+    double AF = gas_turbine_engine_spec.AF;
 
     VECTOR3 airspd = _V(0, 0, 0);
     

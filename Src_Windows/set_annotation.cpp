@@ -1,5 +1,4 @@
 #include "R4.h"
-#include <cstddef>
 
 #include <vector>
 #include <cstring> // Para strcpy

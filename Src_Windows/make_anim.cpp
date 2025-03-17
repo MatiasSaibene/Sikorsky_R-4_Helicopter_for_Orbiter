@@ -1,5 +1,4 @@
 #include "R4.h"
-#include <cmath>
 
 void R4::MakeAnim_MainRotor(){
 
@@ -175,8 +174,6 @@ void R4::MakeAnim_Altimeter(){
 
 void R4::MakeAnim_Compass(){
 
-    anim_compass = CreateAnimation(0.0);
-
     static unsigned int compassGrp = 10;
 
     static MGROUP_ROTATE compass(
@@ -188,8 +185,9 @@ void R4::MakeAnim_Compass(){
         (float)(-360*RAD)
     );
 
+    anim_compass = CreateAnimation(0.0);
     AddAnimationComponent(anim_compass, 0, 1, &compass);
-
+    
 }
 
 void R4::MakeAnim_VerticalSpeed(){
