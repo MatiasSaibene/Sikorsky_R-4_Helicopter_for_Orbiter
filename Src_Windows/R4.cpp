@@ -223,14 +223,25 @@ R4::R4(OBJHANDLE hVessel, int flightmodel) : VESSEL4(hVessel, flightmodel){
 
     efficiency = 0.0;
 
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < ntdvtx_td_points_pontoon_land; i++){
 
         td_points_pontoon_land[i] = {0};
 
     }
 
+    for(int i = 0; i < ntdvtx_td_points; i++){
 
+        td_points[i] = {0};
 
+    }
+
+    for(int i = 0; i < ntdvtx_td_points_pontoon_water; i++){
+
+        td_points_pontoon_water[i] = {0};
+
+    }
+
+    
     //Initial control settings
 
     double roll = 0.0;
@@ -253,6 +264,14 @@ void R4::clbkSetClassCaps(FILEHANDLE cfg){
     hR4 = GetHandle();
 
     vi = oapiGetVesselInterface(hR4);
+
+    hfuselage = oapiLoadMeshGlobal(FUS_MESH_NAME);
+
+    AddMesh(hfuselage);
+
+    ShiftMesh(0, operator*(cg, -1));
+
+    SetMeshVisibilityMode(0, MESHVIS_ALWAYS);
 
     EngineSpec _engine_spec;
 
@@ -440,13 +459,13 @@ void R4::clbkLoadStateEx(FILEHANDLE scn, void *vs){
 
 void R4::clbkPostCreation(){
 
-    hfuselage = oapiLoadMeshGlobal(FUS_MESH_NAME);
+    /* hfuselage = oapiLoadMeshGlobal(FUS_MESH_NAME);
 
     AddMesh(hfuselage);
 
     ShiftMesh(0, operator*(cg, -1));
 
-    SetMeshVisibilityMode(0, MESHVIS_ALWAYS);
+    SetMeshVisibilityMode(0, MESHVIS_ALWAYS); */
 
 
 

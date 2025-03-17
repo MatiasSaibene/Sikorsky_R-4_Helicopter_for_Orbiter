@@ -198,7 +198,6 @@ class R4 : public VESSEL4{
         oapi::FVECTOR4 color;
         THRUSTER_HANDLE th_dummy, thg_dummy, th_hover, thg_hover;
         PROPELLANT_HANDLE main_fuel_tank;
-        unsigned int ui_hmesh;
         BEACONLIGHTSPEC beaconspec[3];
         BEACONLIGHTSPEC searchlight_beaconspec[1];
         LightEmitter *beaconlight;

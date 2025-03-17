@@ -13,7 +13,7 @@ if (MSVC)
     add_compile_options(/permissive)
 endif()
 
-set(ORBITER_ROOT "C:\\OpenOrbiter_2024")
+set(ORBITER_ROOT "C:\\Users\\Matias_Saibene\\Desktop\\OpenOrbiter2024")
 set(ORBITER_SDK_DIRECTORY "${ORBITER_ROOT}/Orbitersdk")
 set(LIBRARY_DIRECTORY "${ORBITER_SDK_DIRECTORY}/lib")
 set(INCLUDE_DIRECTORY "${ORBITER_SDK_DIRECTORY}/include")
