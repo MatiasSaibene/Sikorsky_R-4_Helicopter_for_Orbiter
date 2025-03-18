@@ -288,7 +288,7 @@ void R4::MakeAnim_CollectiveIndicator(){
         0,
         &anim_collective_indicatorGrp,
         1,
-        GetHelp_RotatePitch(_V(0, 0.0405, 0), dash_angle)
+        GetHelp_RotatePitch(_V(0, -0.0405, 0), dash_angle)
     );
 
     AddAnimationComponent(anim_collective_indicator, 0, 1, &collective_indicator);
