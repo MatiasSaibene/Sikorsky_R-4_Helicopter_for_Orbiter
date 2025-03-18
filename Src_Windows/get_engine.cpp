@@ -39,7 +39,7 @@ double R4::GetEngine_DieselEfficiency(){
     return efficiency;
 }
 
-double R4::GetEngine_BraytonEfficiency(){
+/* double R4::GetEngine_BraytonEfficiency(){
 
     double rp = gas_turbine_engine_spec.rp;
     double k = 1.2; //specific heat ratio for air (can tweak based on engine size to account for heat losses)
@@ -47,7 +47,7 @@ double R4::GetEngine_BraytonEfficiency(){
     efficiency = 1 - (1 / (pow(rp, (k-1) / k)));
 
     return efficiency;
-}
+} */
 
 void R4::GetEngine_ReciprocatingPower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
    
@@ -102,7 +102,7 @@ void R4::GetEngine_ReciprocatingPower(double efficiency, PROPELLANT_HANDLE fuel_
 
         //Calculate air mass flow rate
 
-        double mass_flow_air = air_density * displacement * (2 / n_stroke) * rpm * (1 / 60); //air flow in kg/s
+        double mass_flow_air = air_density * displacement * (2.0 / n_stroke) * rpm * (1.0 / 60); //air flow in kg/s
         double mass_flow_fuel = mass_flow_air / AF; //fuel flow in kg/s
 
         //Update fuel mass in tank
@@ -135,7 +135,7 @@ void R4::GetEngine_ReciprocatingPower(double efficiency, PROPELLANT_HANDLE fuel_
 
 }
 
-void R4::GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
+/* void R4::GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level){
 
     //Determines power and torque based on efficiency for Brayton cycle turboshaft engines
 
@@ -225,4 +225,4 @@ void R4::GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tan
 
     }
 
-}
+} */

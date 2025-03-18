@@ -575,11 +575,9 @@ void R4::clbkPreStep (double simt, double simdt, double mjd){
     
     //Set engine power and rotor thrust
 
-    GetEngine_GasTurbinePower(efficiency, main_fuel_tank, throttle_level);
+    GetEngine_ReciprocatingPower(efficiency, main_fuel_tank, throttle_level);
 
     double main_rotor_thrust = GetPropeller_Thrust_MainRotor(0.9 * power, airspd.y);
-
-    oapiWriteLogV("%lf", power);
 
     main_rotor_thrust_vec = GetHelp_Rotate(_V(0, main_rotor_thrust, 0), pitch * 6 * RAD, 0, roll * 6 * RAD);
 

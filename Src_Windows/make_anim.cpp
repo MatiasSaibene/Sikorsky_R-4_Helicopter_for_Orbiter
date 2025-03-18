@@ -212,7 +212,7 @@ void R4::MakeAnim_ArtificialHorizon(){
 
     static unsigned int horizon_circleGrp = 14;
 
-    anim_horizon_circle = CreateAnimation(0.0);
+    anim_horizon_circle = CreateAnimation(0.5);
 
     static MGROUP_ROTATE horizon_circle(
         0,

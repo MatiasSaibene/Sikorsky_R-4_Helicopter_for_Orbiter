@@ -69,7 +69,7 @@ class R4 : public VESSEL4{
         };
         EngineSpec engine_spec;
 
-        struct GasTurbine_EngineSpec{
+        /* struct GasTurbine_EngineSpec{
 
             int rp = 20; //pressure ratio
 
@@ -83,7 +83,7 @@ class R4 : public VESSEL4{
 
             double AF = 77.1; //air fuel ratio (mass air/mass fuel) (stochiometric ~14.6:1 for typical liquid fuels)
         };
-        GasTurbine_EngineSpec gas_turbine_engine_spec;
+        GasTurbine_EngineSpec gas_turbine_engine_spec; */
 
         //Rotor diameters (R-4)
         struct MainRotorSpec{
@@ -132,9 +132,9 @@ class R4 : public VESSEL4{
 
         double GetEngine_OttoEfficiency();
         double GetEngine_DieselEfficiency();
-        double GetEngine_BraytonEfficiency();
+        /* double GetEngine_BraytonEfficiency(); */
         void GetEngine_ReciprocatingPower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
-        void GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level);
+        /* void GetEngine_GasTurbinePower(double efficiency, PROPELLANT_HANDLE fuel_tank_handle, double throttle_level); */
 
 
         void MakeAnim_MainRotor();
